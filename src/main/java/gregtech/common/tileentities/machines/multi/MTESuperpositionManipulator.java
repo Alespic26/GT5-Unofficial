@@ -40,8 +40,7 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.blocks.BlockCasings10;
 import gregtech.common.misc.GTStructureChannels;
 
-public class MTESuperpositionManipulator extends MTEExtendedPowerMultiBlockBase<MTESuperpositionManipulator>
-    implements ISurvivalConstructable  {
+public class MTESuperpositionManipulator extends MTEExtendedPowerMultiBlockBase<MTESuperpositionManipulator> implements ISurvivalConstructable  {
 
     private static final String STRUCTURE_PIECE_MAIN = "main";
     private static final IStructureDefinition<MTESuperpositionManipulator> STRUCTURE_DEFINITION = StructureDefinition
@@ -203,7 +202,10 @@ public class MTESuperpositionManipulator extends MTEExtendedPowerMultiBlockBase<
                     onElementPass(MTESuperpositionManipulator::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings10, 15)))
         )
         .addElement('C', ofFrame(Materials.Steel))
-        .addElement('C', ofFrame(Materials.Steel))
+        .addElement('D',
+            buildHatchAdder(MTESuperpositionManipulator.class)
+                .casingIndex(11)
+                .buildAndChain(GregTechAPI.sBlockCasings1, 11))
         .build();
 
     protected MTESuperpositionManipulator(int aID, String aName, String aNameRegional) {
@@ -218,12 +220,6 @@ public class MTESuperpositionManipulator extends MTEExtendedPowerMultiBlockBase<
 
     public MTESuperpositionManipulator(String aName) {
         super(aName);
-    }
-
-
-    @Override
-    public void construct(ItemStack stackSize, boolean hintsOnly) {
-
     }
 
     @Override
@@ -300,8 +296,40 @@ public class MTESuperpositionManipulator extends MTEExtendedPowerMultiBlockBase<
     }
 
     @Override
+    public void construct(ItemStack stackSize, boolean hintsOnly) {
+        buildPiece(STRUCTURE_PIECE_MAIN, stackSize, hintsOnly, 6, 6, 0);
+    }
+
+    @Override
+    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
+        if (mMachine) return -1;
+        return survivalBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 6, 6, 0, elementBudget, env, false, true);
+    }
+
+    @Override
     public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
-        return false;
+        mCasingAmount = 0;
+        return checkPiece(STRUCTURE_PIECE_MAIN, 1, 2, 0) && mCasingAmount >= 14;
+    }
+
+    @Override
+    public RecipeMap<?> getRecipeMap() {
+        return RecipeMaps.brewingRecipes;
+    }
+
+    @Override
+    public boolean supportsVoidProtection() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsBatchMode() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsInputSeparation() {
+        return true;
     }
 
 
